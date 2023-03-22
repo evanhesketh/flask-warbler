@@ -116,9 +116,11 @@ def logout():
     """Handle logout of user and redirect to homepage."""
 
     form = CsrfForm()
+    curr_user = session["CURR_USER_KEY"]
 
     if form.validate_on_submit():
         do_logout()
+        flash(f"You have logged out, {curr_user}!")
         return redirect('/')
 
     else:
