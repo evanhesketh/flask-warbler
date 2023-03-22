@@ -45,6 +45,7 @@ class LoginForm(FlaskForm):
         validators=[Length(min=6)],
     )
 
+
 class UserUpdateForm(FlaskForm):
     """Form for adding users."""
 
@@ -56,6 +57,10 @@ class UserUpdateForm(FlaskForm):
     email = StringField(
         'E-mail',
         validators=[DataRequired(), Email()],
+    )
+
+    location = StringField(
+        '(Optional) Location',
     )
 
     image_url = StringField(
@@ -74,6 +79,7 @@ class UserUpdateForm(FlaskForm):
         'Password',
         validators=[Length(min=6)],
     )
+
 
 class CsrfForm(FlaskForm):
     """CSRF form."""
