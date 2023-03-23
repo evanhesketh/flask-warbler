@@ -24,6 +24,7 @@
       </div>
       <div class="like-btn-form">
         <form action="/messages/{{ message.id }}/unlike" method="POST">
+          <input type="hidden" name="url" value="/users/{{ user.id }}/likes">
           {{ form.hidden_tag() }}
           <button class="like-btn"><i class="bi bi-egg-fill"></i></button>
         </form>

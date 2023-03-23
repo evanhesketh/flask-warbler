@@ -62,32 +62,18 @@
           <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
           <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
           <p>{{ msg.text }}</p>
-          <!-- {% if msg.user_id != g.user.id %}
-          {% if g.user.has_liked(msg) %}
-          <form action="/messages/{{ msg.id }}/unlike" method="POST"
-          class="like-btn-form">
-            {{ form.hidden_tag() }}
-            <button class="like-btn"><i class="bi bi-egg-fill egg-icon"></i></button>
-          </form>
-          {% else %}
-          <form action="/messages/{{ msg.id }}/like" method="POST"
-          class="like-btn-form">
-            {{ form.hidden_tag() }}
-            <button class="like-btn"><i class="bi bi-egg egg-icon"></i></button>
-          </form>
-          {% endif %}
-          {% endif %}
-          <span>{{msg.message_liked_by | length}}</span> -->
         </div>
         <div class="like-btn-form">
           {% if msg.user_id != g.user.id %}
           {% if g.user.has_liked(msg) %}
           <form action="/messages/{{ msg.id }}/unlike" method="POST" class="like-btn-form">
+            <input type="hidden" name="url" value="/">
             {{ form.hidden_tag() }}
             <button class="like-btn"><i class="bi bi-egg-fill egg-icon"></i></button>
           </form>
           {% else %}
           <form action="/messages/{{ msg.id }}/like" method="POST" class="like-btn-form">
+            <input type="hidden" name="url" value="/">
             {{ form.hidden_tag() }}
             <button class="like-btn"><i class="bi bi-egg egg-icon"></i></button>
           </form>

@@ -382,11 +382,12 @@ def add_like_to_message(message_id):
 
     if form.validate_on_submit():
         msg = Message.query.get_or_404(message_id)
+        url = request.form['url']
 
         g.user.liked_messages.append(msg)
         db.session.commit()
 
-        return redirect(f'/users/{g.user.id}/likes')
+        return redirect(url)
 
     else:
         raise Unauthorized()
@@ -403,11 +404,12 @@ def remove_like_from_message(message_id):
 
     if form.validate_on_submit():
         msg = Message.query.get_or_404(message_id)
+        url = request.form['url']
 
         g.user.liked_messages.remove(msg)
         db.session.commit()
 
-        return redirect(f'/users/{g.user.id}/likes')
+        return redirect(url)
 
     else:
         raise Unauthorized()
