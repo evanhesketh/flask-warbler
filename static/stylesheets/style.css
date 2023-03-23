@@ -560,6 +560,11 @@ p.card-bio {
 }
 
 /* ==================================== likes */
-/* .like-btn {
-  visibility: hidden;
-} */
+.like-btn {
+  all: unset;
+  display: inline;
+}
+
+.like-btn-form {
+  display: inline;
+}

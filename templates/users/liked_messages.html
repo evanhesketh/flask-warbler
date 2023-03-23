@@ -21,6 +21,11 @@
               {{ message.timestamp.strftime('%d %B %Y') }}
             </span>
         <p>{{ message.text }}</p>
+        <form action="/messages/{{ message.id }}/unlike" method="POST">
+          {{ form.hidden_tag() }}
+          <button class="like-btn"><i class="bi bi-egg-fill"></i></button>
+        </form>
+        <span>{{message.message_liked_by | length}}</span>
       </div>
     </li>
 
