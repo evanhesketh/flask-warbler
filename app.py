@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
 from forms import UserAddForm, LoginForm, MessageForm, CsrfForm, UserUpdateForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Likes
 
 load_dotenv()
 

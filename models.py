@@ -77,6 +77,12 @@ class User(db.Model):
 
     messages = db.relationship('Message', backref="user")
 
+    liked_messages = db.relationship(
+        "Message",
+        secondary="likes",
+        backref="message_liked_by"
+    )
+
     followers = db.relationship(
         "User",
         secondary="follows",
@@ -144,7 +150,9 @@ class User(db.Model):
 
 
 class Message(db.Model):
-    """An individual message ("warble")."""
+    """An individual message ("warble").
+    liked-messages <-> message_liked_by
+    """
 
     __tablename__ = 'messages'
 
@@ -180,3 +188,24 @@ def connect_db(app):
     app.app_context().push()
     db.app = app
     db.init_app(app)
+
+
+class Likes(db.Model):
+    """ Join table for users and liked_messages"""
+
+    __tablename__ = "likes"
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey("messages.id"),
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        primary_key=True
+    )
+
+
+
