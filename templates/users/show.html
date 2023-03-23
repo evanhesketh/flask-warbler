@@ -23,21 +23,21 @@
       </div>
       <div class="like-btn-form">
         {% if message.user_id != g.user.id %}
-        {% if g.user.has_liked(message) %}
-        <form action="/messages/{{ message.id }}/unlike" method="POST" class="like-btn-form">
-          <input type="hidden" name="url" value="/users/{{ user.id}}">
-          {{ form.hidden_tag() }}
-          <button class="like-btn"><i class="bi bi-egg-fill egg-icon"></i></button>
-        </form>
-        {% else %}
-        <form action="/messages/{{ message.id }}/like" method="POST" class="like-btn-form">
-          <input type="hidden" name="url" value="/users/{{ user.id }}">
-          {{ form.hidden_tag() }}
-          <button class="like-btn"><i class="bi bi-egg egg-icon"></i></button>
-        </form>
+          {% if g.user.has_liked(message) %}
+          <form action="/messages/{{ message.id }}/unlike" method="POST" class="like-btn-form">
+            <input type="hidden" name="url" value="/users/{{ user.id}}">
+            {{ form.hidden_tag() }}
+            <button class="like-btn"><i class="bi bi-egg-fill egg-icon"></i></button>
+          </form>
+          {% else %}
+          <form action="/messages/{{ message.id }}/like" method="POST" class="like-btn-form">
+            <input type="hidden" name="url" value="/users/{{ user.id }}">
+            {{ form.hidden_tag() }}
+            <button class="like-btn"><i class="bi bi-egg egg-icon"></i></button>
+          </form>
+          {% endif %}
         {% endif %}
-        {% endif %}
-        <span>{{message.message_liked_by | length}}</span>
+        <span>{{message.likes | length}}</span>
       </div>
     </li>
 

@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
 from forms import UserAddForm, LoginForm, MessageForm, CsrfForm, UserUpdateForm
-from models import db, connect_db, User, Message, Likes
+from models import db, connect_db, User, Message, Like
 
 load_dotenv()
 
@@ -217,6 +217,8 @@ def start_following(follow_id):
         db.session.commit()
 
         return redirect(f"/users/{g.user.id}/following")
+    else:
+        raise Unauthorized()
 
 
 @app.post('/users/stop-following/<int:follow_id>')
@@ -368,11 +370,15 @@ def show_liked_messages(user_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    return render_template('users/liked_messages.html', user=g.user, form=g.csrf_form)
+    user = User.query.get_or_404(user_id)
+
+    return render_template('users/liked_messages.html', user=user, form=g.csrf_form)
 
 @app.post('/messages/<int:message_id>/like')
 def add_like_to_message(message_id):
-    """Append message to our liked messages list in database"""
+    """Append message to our liked messages list in database.
+    Redirect to same page.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -382,6 +388,11 @@ def add_like_to_message(message_id):
 
     if form.validate_on_submit():
         msg = Message.query.get_or_404(message_id)
+
+        # extra check against user liking own post
+        if msg.user.id == g.user.id:
+            raise Unauthorized()
+
         url = request.form['url']
 
         g.user.liked_messages.append(msg)
@@ -394,8 +405,9 @@ def add_like_to_message(message_id):
 
 @app.post('/messages/<int:message_id>/unlike')
 def remove_like_from_message(message_id):
-    """Pop message from liked messages list in database"""
-
+    """Pop message from liked messages list in database
+    Redirect to same page.
+    """
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -404,6 +416,11 @@ def remove_like_from_message(message_id):
 
     if form.validate_on_submit():
         msg = Message.query.get_or_404(message_id)
+
+        # extra check against user liking own post
+        if msg.user.id == g.user.id:
+            raise Unauthorized()
+
         url = request.form['url']
 
         g.user.liked_messages.remove(msg)

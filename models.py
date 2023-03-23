@@ -80,9 +80,8 @@ class User(db.Model):
     liked_messages = db.relationship(
         "Message",
         secondary="likes",
-        backref="message_liked_by"
+        backref="likes"
     )
-    #TODO: plural name for the backref (M:M)
 
     followers = db.relationship(
         "User",
@@ -159,7 +158,7 @@ class User(db.Model):
 
 class Message(db.Model):
     """An individual message ("warble").
-    liked-messages <-> message_liked_by
+    liked-messages <-> likes
     """
 
     __tablename__ = 'messages'
@@ -186,6 +185,8 @@ class Message(db.Model):
         nullable=False,
     )
 
+    # backreferece to liked_messages on User
+
 
 def connect_db(app):
     """Connect this database to provided Flask app.
@@ -198,7 +199,7 @@ def connect_db(app):
     db.init_app(app)
 
 
-class Likes(db.Model):
+class Like(db.Model):
     """ Join table for users and liked_messages"""
 
     __tablename__ = "likes"
@@ -215,6 +216,5 @@ class Likes(db.Model):
         primary_key=True
     )
 
-#TODO: change class name to Like
 
 
