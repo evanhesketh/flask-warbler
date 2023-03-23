@@ -148,6 +148,13 @@ class User(db.Model):
             user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
+    def has_liked(self, clicked_message):
+        """Has this user liked 'clicked_message'"""
+
+        found_like_list = [
+            message for message in self.liked_messages if message == clicked_message]
+        return len(found_like_list) == 1
+
 
 class Message(db.Model):
     """An individual message ("warble").

@@ -1,6 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'users/detail.html' %}
 
 {% block content %}
+
+{% for message in g.user.liked_messages %}
 
 <div class="bg"></div>
 <div class="row justify-content-center">
@@ -61,5 +63,6 @@
     </ul>
   </div>
 </div>
+{% endfor %}
 
 {% endblock %}

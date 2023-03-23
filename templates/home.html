@@ -57,6 +57,17 @@
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
               <p>{{ msg.text }}</p>
             </div>
+            {% if msg.user_id != g.user.id %}
+              {% if g.user.has_liked(msg) %}
+                <form action="">
+                  <button>Unlike</button>
+                </form>
+              {% else %}
+                <form action="">
+                  <button>Like</button>
+                </form>
+              {% endif %}
+            {% endif %}
           </li>
         {% endfor %}
       </ul>

@@ -281,17 +281,24 @@ def delete_user():
     Redirect to signup page.
     """
 
+    form = g.csrf_form
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    do_logout()
+    if form.validate_on_submit():
 
-    Message.query.filter(Message.user_id == g.user.id).delete()
-    db.session.delete(g.user)
-    db.session.commit()
+        do_logout()
 
-    return redirect("/signup")
+        Message.query.filter(Message.user_id == g.user.id).delete()
+        db.session.delete(g.user)
+        db.session.commit()
+
+        return redirect("/signup")
+
+    else:
+        raise Unauthorized()
 
 
 ##############################################################################
@@ -349,6 +356,19 @@ def delete_message(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+##############################################################################
+# Likes
+
+@app.get('/users/<int:user_id>/likes')
+def show_liked_messages(user_id):
+    """Display all messages user has liked"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    return render_template('users/liked_messages.html', user=g.user, form=g.csrf_form)
 
 
 ##############################################################################
