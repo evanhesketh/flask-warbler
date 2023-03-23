@@ -539,6 +539,10 @@ p.card-bio {
   margin-bottom: 10px;
 }
 
+a .message-link {
+  z-index: -9999;
+}
+
 /* ================================ 404 page */
 
 .message-404 {
@@ -563,8 +567,14 @@ p.card-bio {
 .like-btn {
   all: unset;
   display: inline;
+  z-index: 9999;
 }
 
 .like-btn-form {
   display: inline;
+  z-index: 9999;
+}
+
+.egg-icon {
+  z-index: 9999;
 }

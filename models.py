@@ -82,6 +82,7 @@ class User(db.Model):
         secondary="likes",
         backref="message_liked_by"
     )
+    #TODO: plural name for the backref (M:M)
 
     followers = db.relationship(
         "User",
@@ -214,5 +215,6 @@ class Likes(db.Model):
         primary_key=True
     )
 
+#TODO: change class name to Like
 
 
