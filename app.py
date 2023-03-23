@@ -370,6 +370,51 @@ def show_liked_messages(user_id):
 
     return render_template('users/liked_messages.html', user=g.user, form=g.csrf_form)
 
+@app.post('/messages/<int:message_id>/like')
+def add_like_to_message(message_id):
+    """Append message to our liked messages list in database"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+        msg = Message.query.get_or_404(message_id)
+
+        g.user.liked_messages.append(msg)
+        db.session.commit()
+
+        return redirect(f'/users/{g.user.id}/likes')
+
+    else:
+        raise Unauthorized()
+
+@app.post('/messages/<int:message_id>/unlike')
+def remove_like_from_message(message_id):
+    """Pop message from liked messages list in database"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+        msg = Message.query.get_or_404(message_id)
+
+        g.user.liked_messages.remove(msg)
+        db.session.commit()
+
+        return redirect(f'/users/{g.user.id}/likes')
+
+    else:
+        raise Unauthorized()
+
+
+
+
 
 ##############################################################################
 # Homepage and error pages
