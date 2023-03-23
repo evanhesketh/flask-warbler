@@ -271,7 +271,7 @@ def profile():
         else:
             flash("Invalid username/password")
 
-    return render_template('users/edit.html', form=form, user=user)
+    return render_template('users/edit.html', form=form, user=g.user)
 
 
 @app.post('/users/delete')
