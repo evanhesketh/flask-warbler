@@ -31,12 +31,12 @@
           <form action="/messages/{{ message.id }}/like" method="POST" class="like-btn-form">
             <input type="hidden" name="url" value="/users/{{ user.id }}">
             {{ form.hidden_tag() }}
-            <button class="like-btn"><i class="bi bi-egg egg-icon"></i></button>
+            <button class="like-btn"><i class="bi bi-egg"></i></button>
           </form>
           {% endif %}
         {% endif %}
         {% if (message.likes | length) > 0 %}
-            <span>{{message.likes | length}}</span>
+            <span class="text-muted">{{message.likes | length}}</span>
         {% endif %}
       </div>
     </li>

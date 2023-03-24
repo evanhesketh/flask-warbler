@@ -54,7 +54,7 @@
             class="like-btn-form">
             <input type="hidden" name="url" value="/messages/{{ message.id }}">
               {{ form.hidden_tag() }}
-                <button class="like-btn"><i class="bi bi-egg-fill"></i></button>
+                <button class="like-btn"><i class="bi bi-egg-fill egg-icon"></i></button>
               </form>
             {% else %}
             <form action="/messages/{{ message.id }}/like" method="POST"
@@ -66,7 +66,7 @@
             {% endif %}
           {% endif %}
           {% if (message.likes | length) > 0 %}
-            <span>{{message.likes | length}}</span>
+            <span class="text-muted">{{message.likes | length}}</span>
           {% endif %}
         </div>
       </li>
