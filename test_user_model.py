@@ -31,15 +31,18 @@ db.drop_all()
 db.create_all()
 
 bcrypt = Bcrypt()
-PASSWORD = bcrypt.generate_password_hash("password", rounds=5).decode("utf-8")
+HASHED_PASSWORD = bcrypt.generate_password_hash("password").decode("utf-8")
+
+DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
+DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler-hero.jpg"
 
 
 class UserModelTestCase(TestCase):
     def setUp(self):
         User.query.delete()
 
-        u1 = User.signup("u1", "u1@email.com", PASSWORD, None)
-        u2 = User.signup("u2", "u2@email.com", PASSWORD, None)
+        u1 = User.signup("u1", "u1@email.com", "password", None)
+        u2 = User.signup("u2", "u2@email.com", "password", None)
 
         db.session.commit()
         self.u1_id = u1.id
@@ -53,9 +56,18 @@ class UserModelTestCase(TestCase):
     def test_user_model(self):
         u1 = User.query.get(self.u1_id)
 
-        # User should have no messages & no followers
+        #Test all attributes after User instantiation
         self.assertEqual(len(u1.messages), 0)
         self.assertEqual(len(u1.followers), 0)
+        self.assertEqual(len(u1.liked_messages), 0)
+        self.assertEqual(u1.email, "u1@email.com")
+        self.assertEqual(u1.username, "u1")
+        self.assertEqual(u1.image_url, DEFAULT_IMAGE_URL)
+        self.assertEqual(u1.header_image_url, DEFAULT_HEADER_IMAGE_URL)
+        self.assertTrue(bcrypt.check_password_hash(u1.password, 'password'))
+        self.assertEqual(u1.bio, None)
+        self.assertEqual(u1.location, None)
+
 
     def test_user_is_following(self):
         u1 = User.query.get(self.u1_id)
@@ -88,13 +100,51 @@ class UserModelTestCase(TestCase):
         self.assertTrue(bcrypt.check_password_hash(u.password, "password"))
         self.assertTrue(u.username, "named")
 
-    def test_user_signup_failure_no_name_given(self):
-        # u = User.signup("u1", "f@e.com", "password", None)
-        # db.session.commit()
-        # u = User.query.filter(User.email=="f@e.com").one_or_none()
-        # self.assertIsNone(u)
-        # self.assertRaises(IntegrityError, User.signup("u1", "f@e.com", "password", None))
-        # with pytest.raises(IntegrityError):
-        #     User.signup("u1", "f@e.com", "password", None)
+    def test_user_signup_failure_existing_username(self):
+        User.signup("u1", "f@e.com", "password", None)
+
+        self.assertRaises(IntegrityError, db.session.commit)
+
+    def test_user_signup_failure_no_username(self):
+        User.signup(None, "f@e.com", "password", None)
+
+        self.assertRaises(IntegrityError, db.session.commit)
+
+    def test_user_signup_failure_existing_email(self):
+        User.signup("newuser", "u1@email.com", "password", None)
+
+        self.assertRaises(IntegrityError, db.session.commit)
+
+    def test_user_signup_failure_no_email(self):
+        User.signup("newuser", None, "password", None)
+
+        self.assertRaises(IntegrityError, db.session.commit)
+
+    #TODO: fix test below
+
+    # def test_user_signup_failure_no_password(self):
+    #     u = User.signup("newuser", "e@e.com", None, None)
+
+    #     self.assertRaises(ValueError, bcrypt.generate_password_hash, u.password)
+
+    def test_user_authenticate_sucess(self):
+        user = User.authenticate("u1", "password")
+        u1 = User.query.get(self.u1_id)
+
+        self.assertEqual(user, u1)
+
+    def test_user_authenticate_fail_invalid_username(self):
+        user = User.authenticate("notthere", "password")
+
+        self.assertFalse(user)
+
+    def test_user_authenticate_fail_invalid_password(self):
+        user = User.authenticate("u1", "12345")
+
+        self.assertFalse(user)
+
+
+
+
 
 

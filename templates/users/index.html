@@ -25,7 +25,7 @@
                 <p>@{{ user.username }}</p>
               </a>
 
-              {% if g.user %}
+              {% if g.user and g.user.id != user.id %}
               {% if g.user.is_following(user) %}
               <form method="POST"
                     action="/users/stop-following/{{ user.id }}">
