@@ -62,8 +62,6 @@
           <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
           <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
           <p>{{ msg.text }}</p>
-        </div>
-        <div class="like-btn-form">
           {% if msg.user_id != g.user.id %}
             {% if g.user.has_liked(msg) %}
             <form action="/messages/{{ msg.id }}/unlike" method="POST" class="like-btn-form">

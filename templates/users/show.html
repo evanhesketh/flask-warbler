@@ -20,8 +20,6 @@
               {{ message.timestamp.strftime('%d %B %Y') }}
             </span>
         <p>{{ message.text }}</p>
-      </div>
-      <div class="like-btn-form">
         {% if message.user_id != g.user.id %}
           {% if g.user.has_liked(message) %}
           <form action="/messages/{{ message.id }}/unlike" method="POST" class="like-btn-form">

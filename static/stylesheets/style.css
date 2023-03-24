@@ -567,12 +567,12 @@ a .message-link {
 .like-btn {
   all: unset;
   display: inline;
+  position: relative;
   z-index: 9999;
 }
 
 .like-btn-form {
   display: inline;
-  z-index: 9999;
 }
 
 .egg-icon {
