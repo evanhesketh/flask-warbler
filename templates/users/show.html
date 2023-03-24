@@ -35,7 +35,9 @@
           </form>
           {% endif %}
         {% endif %}
-        <span>{{message.likes | length}}</span>
+        {% if (message.likes | length) > 0 %}
+            <span>{{message.likes | length}}</span>
+        {% endif %}
       </div>
     </li>
 
