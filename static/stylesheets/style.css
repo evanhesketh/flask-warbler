@@ -307,6 +307,12 @@ nav + .container {
   }
 }
 
+@media (max-width: 581px) {
+  #search, .bi-search{
+    display: none;
+  }
+}
+
 .user-location {
   color: #657786;
 }
