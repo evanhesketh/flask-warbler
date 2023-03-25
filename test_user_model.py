@@ -120,12 +120,9 @@ class UserModelTestCase(TestCase):
 
         self.assertRaises(IntegrityError, db.session.commit)
 
-    #TODO: fix test below
-
-    # def test_user_signup_failure_no_password(self):
-    #     u = User.signup("newuser", "e@e.com", None, None)
-
-    #     self.assertRaises(ValueError, bcrypt.generate_password_hash, u.password)
+    def test_user_signup_failure_no_password(self):
+        with self.assertRaises(ValueError):
+            User.signup("newuser", "e@e.com", None, None)
 
     def test_user_authenticate_sucess(self):
         user = User.authenticate("u1", "password")
