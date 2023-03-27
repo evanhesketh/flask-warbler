@@ -149,7 +149,7 @@ class User(db.Model):
         return len(found_user_list) == 1
 
     def has_liked(self, clicked_message):
-        """Has this user liked 'clicked_message'"""
+        """Has this user liked 'clicked_message'?"""
 
         found_like_list = [
             message for message in self.liked_messages if message == clicked_message]
@@ -158,7 +158,7 @@ class User(db.Model):
 
 class Message(db.Model):
     """An individual message ("warble").
-    liked-messages <-> likes
+    Connection of likes <-> liked_messages
     """
 
     __tablename__ = 'messages'
@@ -185,14 +185,11 @@ class Message(db.Model):
         nullable=False,
     )
 
-    # backreferece to liked_messages on User
+    # likes = backreference to liked_messages on User
 
 
 def connect_db(app):
-    """Connect this database to provided Flask app.
-
-    You should call this in your Flask app.
-    """
+    """Connects this database to provided Flask app."""
 
     app.app_context().push()
     db.app = app

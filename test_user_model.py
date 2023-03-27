@@ -5,12 +5,13 @@
 #    python -m unittest test_user_model.py
 
 
+from app import app
 import os
 from unittest import TestCase
 
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import IntegrityError
-from models import db, User, Message, Follows
+from models import db, User, Message, Like
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -19,9 +20,6 @@ from models import db, User, Message, Follows
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
-# Now we can import app
-
-from app import app
 
 # Create our tables (we do this here, so we only create the tables
 # once for all tests --- in each test, we'll delete the data
@@ -56,7 +54,7 @@ class UserModelTestCase(TestCase):
     def test_user_model(self):
         u1 = User.query.get(self.u1_id)
 
-        #Test all attributes after User instantiation
+        # Test all attributes after User instantiation
         self.assertEqual(len(u1.messages), 0)
         self.assertEqual(len(u1.followers), 0)
         self.assertEqual(len(u1.liked_messages), 0)
@@ -67,7 +65,6 @@ class UserModelTestCase(TestCase):
         self.assertTrue(bcrypt.check_password_hash(u1.password, 'password'))
         self.assertEqual(u1.bio, None)
         self.assertEqual(u1.location, None)
-
 
     def test_user_is_following(self):
         u1 = User.query.get(self.u1_id)
@@ -96,29 +93,29 @@ class UserModelTestCase(TestCase):
     def test_user_signup(self):
         u = User.signup("named", "e@e.com", "password", None)
         db.session.commit()
-        u = User.query.filter(User.username=="named").one_or_none()
+        u = User.query.filter(User.username == "named").one_or_none()
         self.assertTrue(bcrypt.check_password_hash(u.password, "password"))
         self.assertTrue(u.username, "named")
 
     def test_user_signup_failure_existing_username(self):
-        User.signup("u1", "f@e.com", "password", None)
-
-        self.assertRaises(IntegrityError, db.session.commit)
+        with self.assertRaises(IntegrityError):
+            User.signup("u1", "f@e.com", "password", None)
+            db.session.commit()
 
     def test_user_signup_failure_no_username(self):
-        User.signup(None, "f@e.com", "password", None)
-
-        self.assertRaises(IntegrityError, db.session.commit)
+        with self.assertRaises(IntegrityError):
+            User.signup(None, "f@e.com", "password", None)
+            db.session.commit()
 
     def test_user_signup_failure_existing_email(self):
-        User.signup("newuser", "u1@email.com", "password", None)
-
-        self.assertRaises(IntegrityError, db.session.commit)
+        with self.assertRaises(IntegrityError):
+            User.signup("newuser", "u1@email.com", "password", None)
+            db.session.commit()
 
     def test_user_signup_failure_no_email(self):
-        User.signup("newuser", None, "password", None)
-
-        self.assertRaises(IntegrityError, db.session.commit)
+        with self.assertRaises(IntegrityError):
+            User.signup("newuser", None, "password", None)
+            db.session.commit()
 
     def test_user_signup_failure_no_password(self):
         with self.assertRaises(ValueError):
@@ -140,8 +137,29 @@ class UserModelTestCase(TestCase):
 
         self.assertFalse(user)
 
+    def test_user_has_liked_true(self):
+        new_message = Message(text="new messaage", user_id=self.u1_id)
 
+        db.session.add(new_message)
+        db.session.commit()
 
+        new_like = Like(message_id=new_message.id, user_id=self.u2_id)
 
+        db.session.add(new_like)
+        db.session.commit()
+
+        u2 = User.query.get(self.u2_id)
+
+        self.assertTrue(u2.has_liked(new_message), True)
+
+    def test_user_has_liked_false(self):
+        new_message = Message(text="new messaage", user_id=self.u1_id)
+
+        db.session.add(new_message)
+        db.session.commit()
+
+        u2 = User.query.get(self.u2_id)
+
+        self.assertFalse(u2.has_liked(new_message), False)
 
 

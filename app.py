@@ -90,6 +90,9 @@ def signup():
 
         except IntegrityError:
             flash("Username already taken", 'danger')
+
+            db.session.rollback()
+
             return render_template('users/signup.html', form=form)
 
         do_login(user)
