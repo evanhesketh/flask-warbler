@@ -4,9 +4,11 @@
 <div class="col-sm-9">
   <div class="row">
 
+    {% import 'users/_following.html' as following %}
     {% for follower in user.followers %}
+      {{ following.following(follower, form) }}
 
-    <div class="col-lg-4 col-md-6 col-12">
+    <!-- <div class="col-lg-4 col-md-6 col-12">
       <div class="card user-card">
         <div class="card-inner">
           <div class="image-wrapper">
@@ -41,7 +43,7 @@
           <p class="card-bio">{{ follower.bio }}</p>
         </div>
       </div>
-    </div>
+    </div> -->
 
     {% endfor %}
 

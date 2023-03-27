@@ -5,7 +5,6 @@
 #    python -m unittest test_user_model.py
 
 
-from app import app
 import os
 from unittest import TestCase
 
@@ -19,6 +18,8 @@ from models import db, User, Message, Like
 # connected to the database
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
+
+from app import app
 
 
 # Create our tables (we do this here, so we only create the tables

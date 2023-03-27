@@ -4,8 +4,6 @@
 #
 #    python -m unittest test_user_views.py
 
-
-from app import app
 import os
 from unittest import TestCase
 
@@ -14,14 +12,16 @@ from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import IntegrityError
 from models import db, User, Message, Like
 
-app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
-
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
 # before we import our app, since that will have already
 # connected to the database
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
+
+from app import app
+
+app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 
 # Don't req CSRF for testing
 app.config['WTF_CSRF_ENABLED'] = False
