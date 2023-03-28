@@ -48,7 +48,11 @@ USER_1 = {
 
 
 class UserRoutesTestCase(TestCase):
+    """Tests for User routes."""
+
     def setUp(self):
+        """Make demo data."""
+
         User.query.delete()
 
         u1 = User.signup("u1", "u1@email.com", "password", None)
@@ -61,11 +65,13 @@ class UserRoutesTestCase(TestCase):
         self.client = app.test_client()
 
     def tearDown(self):
+        """Clean up fouled transactions"""
+
         db.session.rollback()
 
     def test_homepage_logged_out(self):
         with app.test_client() as client:
-            resp = client.get('/')
+            resp = client.get("/")
             html = resp.get_data(as_text=True)
             self.assertEqual(resp.status_code, 200)
             self.assertIn("New to Warbler?", html)
@@ -74,14 +80,14 @@ class UserRoutesTestCase(TestCase):
         with app.test_client() as client:
             with client.session_transaction() as sess:
                 sess["curr_user"] = self.u1_id
-            resp = client.get('/')
+            resp = client.get("/")
             html = resp.get_data(as_text=True)
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("@u1", html)
+            self.assertIn("Log Out", html)
 
     def test_signup_form(self):
         with app.test_client() as client:
-            resp = client.get('/signup')
+            resp = client.get("/signup")
             html = resp.get_data(as_text=True)
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Sign me up!", html)
@@ -89,7 +95,7 @@ class UserRoutesTestCase(TestCase):
     def test_signup_ok(self):
         with app.test_client() as client:
             resp = client.post(
-                '/signup',
+                "/signup",
                 data={
                     "username": "u3",
                     "password": "password",
@@ -104,5 +110,102 @@ class UserRoutesTestCase(TestCase):
 
             self.assertTrue(bcrypt.check_password_hash(u3.password, "password"))
             self.assertEqual(session.get("curr_user"), u3.id)
+
+    def test_signup_duplicate_username(self):
+        with app.test_client() as client:
+            resp = client.post(
+                "/signup",
+                data={
+                "username": "u1",
+                "password": "password",
+                "email": "user@user.com"
+                }
+            )
+
+            html=resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Username already taken", html)
+
+    #TODO: def test_signup_duplicate_email(self):
+
+    def test_signup_bad_password(self):
+        with app.test_client() as client:
+            resp = client.post(
+                "/signup",
+                data={
+                "username": "u3",
+                "password": "pw",
+                "email": "user@user.com"
+                }
+            )
+
+            html=resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Field must be at least 6 characters long", html)
+
+    #TODO: def test_signup_bad_image_url(self):
+
+    def test_login_form(self):
+        with app.test_client() as client:
+            resp = client.get("/login")
+            html = resp.get_data(as_text=True)
+            self.assertIn("TEST: login.html", html)
+
+    def test_login_ok(self):
+        with app.test_client() as client:
+            resp = client.post(
+                "/login",
+                data={
+                "username": "u1",
+                "password": "password"
+                }
+            )
+
+            html=resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+            self.assertEqual(session.get("curr_user"), self.u1_id)
+
+    def test_login_bad(self):
+        with app.test_client() as client:
+            resp = client.post(
+                "/login",
+                data={
+                "username": "u3",
+                "password": "wrong-password"
+                }
+            )
+
+            html=resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Invalid credentials", html)
+            self.assertEqual(session.get("curr_user"), None)
+
+    def test_logout(self):
+        with app.test_client() as client:
+            with client.session_transaction() as sess:
+                sess["curr_user"] = self.u1_id
+            resp = client.post(
+                "/logout",
+            )
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+            self.assertEqual(session.get("curr_user"), None)
+
+
+    #TODO: next --> test general user routes
+
+
+
+
+
+
+
+
+
 
 
