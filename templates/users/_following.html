@@ -1,4 +1,4 @@
-{% macro following(user, form) -%}
+{% macro following_card(user, curr_url, form) -%}
 <div class="col-lg-4 col-md-6 col-12">
   <div class="card user-card">
     <div class="card-inner">
@@ -14,20 +14,24 @@
                class="card-image">
           <p>@{{ user.username }}</p>
         </a>
-        {% if g.user.is_following(user) %}
-        <form method="POST"
-              action="/users/stop-following/{{ user.id }}">
-              {{ form.hidden_tag() }}
-          <button class="btn btn-primary btn-sm">Unfollow</button>
-        </form>
-        {% else %}
-        <form method="POST"
-              action="/users/follow/{{ user.id }}">
-            {{ form.hidden_tag() }}
-          <button class="btn btn-outline-primary btn-sm">
-            Follow
-          </button>
-        </form>
+        {% if g.user and g.user.id != user.id %}
+          {% if g.user.is_following(user) %}
+            <form method="POST"
+                  action="/users/stop-following/{{ user.id }}">
+                  {{ form.hidden_tag() }}
+              <input type="hidden" name="curr-url" value="{{ curr_url }}">
+              <button class="btn btn-primary btn-sm">Unfollow</button>
+            </form>
+            {% else %}
+            <form method="POST"
+                  action="/users/follow/{{ user.id }}">
+                {{ form.hidden_tag() }}
+              <input type="hidden" name="curr-url" value="{{ curr_url }}">
+              <button class="btn btn-outline-primary btn-sm">
+                Follow
+              </button>
+            </form>
+          {% endif %}
         {% endif %}
 
       </div>
@@ -36,4 +40,5 @@
   </div>
 </div>
 {%- endmacro %}
+
 

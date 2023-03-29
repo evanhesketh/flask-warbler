@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
 from forms import UserAddForm, LoginForm, MessageForm, CsrfForm, UserUpdateForm
-from models import db, connect_db, User, Message, Like
+from models import db, connect_db, User, Message
 
 load_dotenv()
 
@@ -90,7 +90,7 @@ def signup():
 
         except IntegrityError:
             db.session.rollback()
-            flash("Username already taken", 'danger')
+            flash("Username and/or email already taken", 'danger')
 
             return render_template('users/signup.html', form=form)
 
@@ -130,8 +130,8 @@ def logout():
     form = g.csrf_form
 
     if form.validate_on_submit():
+        flash(f"Goodbye, {g.user.username}", 'success')
         do_logout()
-        flash(f"You have logged out!")
         return redirect('/')
 
     else:
@@ -156,10 +156,17 @@ def list_users():
 
     if not search:
         users = User.query.all()
+        curr_url = '/users'
     else:
         users = User.query.filter(User.username.like(f"%{search}%")).all()
+        curr_url = f'/users?q={search}'
 
-    return render_template('users/index.html', users=users, form=g.csrf_form)
+    return render_template(
+        'users/index.html',
+        users=users,
+        form=g.csrf_form,
+        curr_url=curr_url
+    )
 
 
 @app.get('/users/<int:user_id>')
@@ -172,7 +179,12 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/show.html', user=user, form=g.csrf_form)
+    return render_template(
+        'users/show.html',
+        user=user,
+        form=g.csrf_form,
+        curr_url=f'/users/{user_id}'
+    )
 
 
 @app.get('/users/<int:user_id>/following')
@@ -184,7 +196,12 @@ def show_following(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/following.html', user=user, form=g.csrf_form)
+    return render_template(
+        'users/following.html',
+        user=user,
+        form=g.csrf_form,
+        curr_url=f'/users/{user_id}/following'
+    )
 
 
 @app.get('/users/<int:user_id>/followers')
@@ -196,7 +213,12 @@ def show_followers(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/followers.html', user=user, form=g.csrf_form)
+    return render_template(
+        'users/followers.html',
+        user=user,
+        form=g.csrf_form,
+        curr_url=f'/users/{user_id}/followers'
+    )
 
 
 @app.post('/users/follow/<int:follow_id>')
@@ -214,11 +236,14 @@ def start_following(follow_id):
 
     if form.validate_on_submit():
 
+        curr_url = request.form['curr-url']
+
         followed_user = User.query.get_or_404(follow_id)
         g.user.following.append(followed_user)
         db.session.commit()
 
-        return redirect(f"/users/{g.user.id}/following")
+        # return redirect(f"/users/{g.user.id}/following")
+        return redirect(curr_url)
     else:
         raise Unauthorized()
 
@@ -237,11 +262,14 @@ def stop_following(follow_id):
 
     if form.validate_on_submit():
 
+        curr_url = request.form['curr-url']
+
         followed_user = User.query.get(follow_id)
         g.user.following.remove(followed_user)
         db.session.commit()
 
-        return redirect(f"/users/{g.user.id}/following")
+        # return redirect(f"/users/{g.user.id}/following")
+        return redirect(curr_url)
     else:
         return Unauthorized()
 
@@ -266,7 +294,8 @@ def profile():
             user.email = form.email.data
             user.location = form.location.data
             user.image_url = form.image_url.data or User.image_url.default.arg
-            user.header_image_url = form.header_image_url.data
+            user.header_image_url = (form.header_image_url.data or
+                                     User.header_image_url.default.arg)
             user.bio = form.bio.data
 
             db.session.commit()
@@ -364,6 +393,7 @@ def delete_message(message_id):
 ##############################################################################
 # Likes
 
+
 @app.get('/users/<int:user_id>/likes')
 def show_liked_messages(user_id):
     """Display all messages user has liked"""
@@ -374,11 +404,17 @@ def show_liked_messages(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/liked_messages.html', user=user, form=g.csrf_form)
+    return render_template(
+        'users/liked_messages.html',
+        user=user,
+        form=g.csrf_form,
+        curr_url=f'/users/{user_id}/likes'
+    )
+
 
 @app.post('/messages/<int:message_id>/like')
 def add_like_to_message(message_id):
-    """Append message to our liked messages list in database.
+    """Add message to user's liked messages list.
     Redirect to same page.
     """
 
@@ -395,21 +431,23 @@ def add_like_to_message(message_id):
         if msg.user.id == g.user.id:
             raise Unauthorized()
 
-        url = request.form['url']
+        curr_url = request.form['curr-url']
 
         g.user.liked_messages.append(msg)
         db.session.commit()
 
-        return redirect(url)
+        return redirect(curr_url)
 
     else:
         raise Unauthorized()
 
+
 @app.post('/messages/<int:message_id>/unlike')
 def remove_like_from_message(message_id):
-    """Pop message from liked messages list in database
+    """Remove message from user's liked messages.
     Redirect to same page.
     """
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -423,18 +461,15 @@ def remove_like_from_message(message_id):
         if msg.user.id == g.user.id:
             raise Unauthorized()
 
-        url = request.form['url']
+        curr_url = request.form['curr-url']
 
         g.user.liked_messages.remove(msg)
         db.session.commit()
 
-        return redirect(url)
+        return redirect(curr_url)
 
     else:
         raise Unauthorized()
-
-
-
 
 
 ##############################################################################

@@ -23,7 +23,7 @@
         <p>{{ message.text }}</p>
         <form action="/messages/{{ message.id }}/unlike" method="POST"
         class="like-btn-form">
-          <input type="hidden" name="url" value="/users/{{ user.id }}/likes">
+          <input type="hidden" name="curr-url" value="/users/{{ user.id }}/likes">
           {{ form.hidden_tag() }}
           <button class="like-btn"><i class="bi bi-egg-fill egg-icon"></i></button>
         </form>

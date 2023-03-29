@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms.validators import DataRequired, Email, Length, URL, Optional, ValidationError
 
 
 class MessageForm(FlaskForm):
@@ -29,6 +29,7 @@ class UserAddForm(FlaskForm):
 
     image_url = StringField(
         '(Optional) Image URL',
+        validators=[Optional(), URL()]
     )
 
 
@@ -44,6 +45,14 @@ class LoginForm(FlaskForm):
         'Password',
         validators=[Length(min=6)],
     )
+
+
+def validate_img_url(self, field):
+    """Raises URL validation error if invalid URL and not default image. """
+    print('input', field.data)
+    if (field.data != '/static/images/default-pic.png' and
+            field.data != '/static/images/warbler-hero.jpg'):
+        raise ValidationError('Please enter a valid URL')
 
 
 class UserUpdateForm(FlaskForm):
@@ -65,10 +74,12 @@ class UserUpdateForm(FlaskForm):
 
     image_url = StringField(
         '(Optional) Image URL',
+        validators=[Optional(), validate_img_url]
     )
 
     header_image_url = StringField(
         '(Optional) Image URL',
+        validators=[Optional(), validate_img_url]
     )
 
     bio = TextAreaField(
