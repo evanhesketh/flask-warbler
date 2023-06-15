@@ -99,6 +99,7 @@ def signup():
         return redirect("/")
 
     else:
+        print("FORM NOT VALIDATED")
         return render_template('users/signup.html', form=form)
 
 
