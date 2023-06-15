@@ -4,6 +4,7 @@
 #
 #    python -m unittest test_user_views.py
 
+from app import app
 import os
 from unittest import TestCase
 
@@ -19,7 +20,6 @@ from models import db, User, Message, Like
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
-from app import app
 
 app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 
@@ -108,7 +108,8 @@ class UserRoutesTestCase(TestCase):
 
             u3 = User.query.filter(User.username == "u3").first()
 
-            self.assertTrue(bcrypt.check_password_hash(u3.password, "password"))
+            self.assertTrue(bcrypt.check_password_hash(
+                u3.password, "password"))
             self.assertEqual(session.get("curr_user"), u3.id)
 
     def test_signup_duplicate_username(self):
@@ -116,36 +117,36 @@ class UserRoutesTestCase(TestCase):
             resp = client.post(
                 "/signup",
                 data={
-                "username": "u1",
-                "password": "password",
-                "email": "user@user.com"
+                    "username": "u1",
+                    "password": "password",
+                    "email": "user@user.com"
                 }
             )
 
-            html=resp.get_data(as_text=True)
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("Username already taken", html)
+            self.assertIn("Username and/or email already taken", html)
 
-    #TODO: def test_signup_duplicate_email(self):
+    # TODO: def test_signup_duplicate_email(self):
 
     def test_signup_bad_password(self):
         with app.test_client() as client:
             resp = client.post(
                 "/signup",
                 data={
-                "username": "u3",
-                "password": "pw",
-                "email": "user@user.com"
+                    "username": "u3",
+                    "password": "pw",
+                    "email": "user@user.com"
                 }
             )
 
-            html=resp.get_data(as_text=True)
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Field must be at least 6 characters long", html)
 
-    #TODO: def test_signup_bad_image_url(self):
+    # TODO: def test_signup_bad_image_url(self):
 
     def test_login_form(self):
         with app.test_client() as client:
@@ -158,12 +159,12 @@ class UserRoutesTestCase(TestCase):
             resp = client.post(
                 "/login",
                 data={
-                "username": "u1",
-                "password": "password"
+                    "username": "u1",
+                    "password": "password"
                 }
             )
 
-            html=resp.get_data(as_text=True)
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 302)
             self.assertEqual(resp.location, "/")
@@ -174,12 +175,12 @@ class UserRoutesTestCase(TestCase):
             resp = client.post(
                 "/login",
                 data={
-                "username": "u3",
-                "password": "wrong-password"
+                    "username": "u3",
+                    "password": "wrong-password"
                 }
             )
 
-            html=resp.get_data(as_text=True)
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Invalid credentials", html)
@@ -196,16 +197,4 @@ class UserRoutesTestCase(TestCase):
             self.assertEqual(resp.location, "/")
             self.assertEqual(session.get("curr_user"), None)
 
-
-    #TODO: next --> test general user routes
-
-
-
-
-
-
-
-
-
-
-
+    # TODO: next --> test general user routes
