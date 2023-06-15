@@ -79,6 +79,7 @@ def signup():
     form = UserAddForm()
 
     if form.validate_on_submit():
+        print("FORM VALIDATED")
         try:
             user = User.signup(
                 username=form.username.data,
