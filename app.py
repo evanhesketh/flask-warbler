@@ -276,8 +276,8 @@ def stop_following(follow_id):
             db.session.commit()
 
             # return redirect(f"/users/{g.user.id}/following")
-        except IntegrityError:
-            db.session.rollback()
+        except ValueError:
+            print("ValueError occured")
 
         return redirect(curr_url)
 
@@ -489,8 +489,8 @@ def remove_like_from_message(message_id):
         try:
             g.user.liked_messages.remove(msg)
             db.session.commit()
-        except StaleDataError:
-            db.session.rollback()
+        except ValueError:
+            print("ValueError occured")
 
         return redirect(curr_url)
 
