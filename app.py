@@ -237,15 +237,19 @@ def start_following(follow_id):
     form = g.csrf_form
 
     if form.validate_on_submit():
+        try:
+            curr_url = request.form['curr-url']
 
-        curr_url = request.form['curr-url']
+            followed_user = User.query.get_or_404(follow_id)
+            g.user.following.append(followed_user)
+            db.session.commit()
 
-        followed_user = User.query.get_or_404(follow_id)
-        g.user.following.append(followed_user)
-        db.session.commit()
+            # return redirect(f"/users/{g.user.id}/following")
+            return redirect(curr_url)
+        except IntegrityError:
+            db.session.rollback()
+            return redirect(curr_url)
 
-        # return redirect(f"/users/{g.user.id}/following")
-        return redirect(curr_url)
     else:
         raise Unauthorized()
 
