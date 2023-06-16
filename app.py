@@ -80,7 +80,6 @@ def signup():
     form = UserAddForm()
 
     if form.validate_on_submit():
-        print("FORM VALIDATED")
         try:
             user = User.signup(
                 username=form.username.data,
@@ -101,7 +100,6 @@ def signup():
         return redirect("/")
 
     else:
-        print("FORM NOT VALIDATED")
         return render_template('users/signup.html', form=form)
 
 
@@ -303,19 +301,24 @@ def profile():
             form.password.data)
 
         if user:
-            user.username = form.username.data
-            user.email = form.email.data
-            user.location = form.location.data
-            user.image_url = form.image_url.data or User.image_url.default.arg
-            user.header_image_url = (form.header_image_url.data or
-                                     User.header_image_url.default.arg)
-            user.bio = form.bio.data
+            try:
+                user.username = form.username.data
+                user.email = form.email.data
+                user.location = form.location.data
+                user.image_url = form.image_url.data or User.image_url.default.arg
+                user.header_image_url = (form.header_image_url.data or
+                                        User.header_image_url.default.arg)
+                user.bio = form.bio.data
 
-            db.session.commit()
-            return redirect(f"/users/{g.user.id}")
+                db.session.commit()
+
+                return redirect(f"/users/{g.user.id}")
+            except IntegrityError:
+                db.session.rollback()
+                flash("Username and/or email already taken", 'danger')
 
         else:
-            flash("Invalid username/password")
+            flash("Invalid username/password", 'danger')
 
     return render_template('users/edit.html', form=form, user=g.user)
 
