@@ -278,6 +278,8 @@ def stop_following(follow_id):
             # return redirect(f"/users/{g.user.id}/following")
         except ValueError:
             print("ValueError occured")
+        except StaleDataError:
+            print("Already deleted")
 
         return redirect(curr_url)
 
@@ -491,6 +493,8 @@ def remove_like_from_message(message_id):
             db.session.commit()
         except ValueError:
             print("ValueError occured")
+        except StaleDataError:
+            print("Message already deleted")
 
         return redirect(curr_url)
 
