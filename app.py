@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import StaleDataError
 from werkzeug.exceptions import Unauthorized
 
 from forms import UserAddForm, LoginForm, MessageForm, CsrfForm, UserUpdateForm
@@ -245,10 +246,10 @@ def start_following(follow_id):
             db.session.commit()
 
             # return redirect(f"/users/{g.user.id}/following")
-            return redirect(curr_url)
         except IntegrityError:
             db.session.rollback()
-            return redirect(curr_url)
+
+        return redirect(curr_url)
 
     else:
         raise Unauthorized()
@@ -267,15 +268,19 @@ def stop_following(follow_id):
         return redirect("/")
 
     if form.validate_on_submit():
+        try:
+            curr_url = request.form['curr-url']
 
-        curr_url = request.form['curr-url']
+            followed_user = User.query.get(follow_id)
+            g.user.following.remove(followed_user)
+            db.session.commit()
 
-        followed_user = User.query.get(follow_id)
-        g.user.following.remove(followed_user)
-        db.session.commit()
+            # return redirect(f"/users/{g.user.id}/following")
+        except IntegrityError:
+            db.session.rollback()
 
-        # return redirect(f"/users/{g.user.id}/following")
         return redirect(curr_url)
+
     else:
         return Unauthorized()
 
@@ -330,9 +335,12 @@ def delete_user():
 
         do_logout()
 
-        Message.query.filter(Message.user_id == g.user.id).delete()
-        db.session.delete(g.user)
-        db.session.commit()
+        try:
+            Message.query.filter(Message.user_id == g.user.id).delete()
+            db.session.delete(g.user)
+            db.session.commit()
+        except StaleDataError:
+            db.session.rollback()
 
         return redirect("/signup")
 
@@ -357,9 +365,12 @@ def add_message():
     form = MessageForm()
 
     if form.validate_on_submit():
-        msg = Message(text=form.text.data)
-        g.user.messages.append(msg)
-        db.session.commit()
+        try:
+            msg = Message(text=form.text.data)
+            g.user.messages.append(msg)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
 
         return redirect(f"/users/{g.user.id}")
 
@@ -390,9 +401,12 @@ def delete_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get_or_404(message_id)
-    db.session.delete(msg)
-    db.session.commit()
+    try:
+        msg = Message.query.get_or_404(message_id)
+        db.session.delete(msg)
+        db.session.commit()
+    except StaleDataError:
+        db.session.rollback()
 
     return redirect(f"/users/{g.user.id}")
 
@@ -439,8 +453,11 @@ def add_like_to_message(message_id):
 
         curr_url = request.form['curr-url']
 
-        g.user.liked_messages.append(msg)
-        db.session.commit()
+        try:
+            g.user.liked_messages.append(msg)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
 
         return redirect(curr_url)
 
@@ -469,8 +486,11 @@ def remove_like_from_message(message_id):
 
         curr_url = request.form['curr-url']
 
-        g.user.liked_messages.remove(msg)
-        db.session.commit()
+        try:
+            g.user.liked_messages.remove(msg)
+            db.session.commit()
+        except StaleDataError:
+            db.session.rollback()
 
         return redirect(curr_url)
 
